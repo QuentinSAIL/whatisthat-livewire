@@ -9,13 +9,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->get('dashboard', function () {
-    $images = auth()->user()->userImage()->get();
-    return view('dashboard', [
-        'images' => $images,
-    ]);
-})->name('dashboard');
-
+Route::view('dashboard', 'dashboard')
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

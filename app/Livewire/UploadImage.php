@@ -11,17 +11,16 @@ class UploadImage extends Component
     use WithFileUploads;
 
     public $image;
+    public $description = null;
 
-    public function uploadImage()
+    public function analyzeImage()
     {
         $this->validate([
-            'image' => 'required|image|max:1024', // 1MB Max
+            'image' => 'required|image',
         ]);
 
-        // Lire l’image en binaire
         $imageBytes = file_get_contents($this->image->getRealPath());
 
-        // Créer un client Rekognition
         $client = new RekognitionClient([
             'region' => env('AWS_DEFAULT_REGION'),
             'version' => 'latest',
@@ -31,7 +30,6 @@ class UploadImage extends Component
             ],
         ]);
 
-        // Détecter les labels
         $result = $client->detectLabels([
             'Image' => [
                 'Bytes' => $imageBytes,
@@ -40,22 +38,32 @@ class UploadImage extends Component
             'MinConfidence' => 70,
         ]);
 
-        // Générer la description
         $labels = [];
         foreach ($result['Labels'] as $label) {
             $labels[] = $label['Name'];
         }
 
-        $description = 'Cette image contient : ' . implode(', ', $labels);
+        $this->description = 'Cette image contient : ' . implode(', ', $labels);
+    }
 
-        // Sauvegarder l’image avec la description générée
+    public function uploadImage()
+    {
+        if (!$this->description) {
+            // Prevent uploading without analyzing
+            session()->flash('error', 'Veuillez d’abord analyser l’image.');
+            return;
+        }
+
         $userImage = auth()->user()->userImage()->create([
-            'description' => $description,
+            'description' => $this->description,
         ]);
 
         $userImage->addMedia($this->image->getRealPath())
             ->usingName($this->image->getClientOriginalName())
             ->toMediaCollection();
+
+        $this->reset(['image', 'description']);
+        $this->dispatch('images.refresh');
 
     }
 
