@@ -48,12 +48,6 @@ class UploadImage extends Component
 
     public function uploadImage()
     {
-        if (!$this->description) {
-            // Prevent uploading without analyzing
-            session()->flash('error', 'Veuillez d’abord analyser l’image.');
-            return;
-        }
-
         $userImage = auth()->user()->userImage()->create([
             'description' => $this->description,
         ]);

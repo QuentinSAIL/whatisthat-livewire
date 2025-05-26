@@ -1,4 +1,5 @@
 <div>
+    <p class="mb-4">Analyser une image</p>
     <input type="file" wire:model="image" accept="image/*" class="form-control mb-2">
 
     @if ($description)
@@ -6,12 +7,12 @@
             {{ $description }}
         </div>
 
-        <button wire:click="uploadImage" class="btn btn-success mt-2">
+        <flux:button wire:click="uploadImage" class="btn btn-success mt-2">
             Upload
-        </button>
+        </flux:button>
     @elseif ($image)
-        <button wire:click="analyzeImage" class="btn btn-primary mt-2">
+        <flux:button wire:click="analyzeImage" class="btn btn-primary mt-2">
             Analyze Image
-        </button>
+        </flux:button>
     @endif
 </div>
